@@ -1,0 +1,6 @@
+Pipfile*
+*.txt
+*.pyc
+.ipynb_checkpoints/*
+__pycache__/*
+
