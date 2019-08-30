@@ -1,74 +1,75 @@
 import requests
-import json
-import time
 
-class API:
 
-    def __init__(self,device_adress,api_kay):
-        self.device_adress=device_adress
+class ApiWebHmi:
+    """ Umozliwia połaczenie sie z urzadzniem webHMI za pomocą jego API """
+    def __init__(self, device_adress, api_kay):
+        self.device_adress = device_adress
         self.headers = {'X-WH-APIKEY': api_kay,
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
-                        'X-WH-CONNS' : '',
-                        'X-WH-START' : '',
-                        'X-WH-END' : '',
-                        'X-WH-REG-IDS' : '',
-                        'X-WH-SLICES' : '',
-                        'X-WH-REGS' : '',
+                        'X-WH-CONNS': '',
+                        'X-WH-START': '',
+                        'X-WH-END': '',
+                        'X-WH-REG-IDS': '',
+                        'X-WH-SLICES': '',
+                        'X-WH-REGS': '',
                         }
 
-        self.api_adress={'connectionList':{'adress':'/api/connections'},
-                         'registerList':{'adress':'/api/registers/'},
-                         'trendList':{'adress':'/api/trends/'},
-                         'graphList':{'adress':'/api/graphs'},
-                         'getCurValue':{'adress':'/api/register-values'},
-                         'getLocTime':{'adress':'/api/timeinfo'},
-                         'getRegLog':{'adress':'/api/register-log'},
-                         'getGraphData':{'adress':'/api/graph-data/'},
-                         }
+        self.api_adress = {'connectionList': {'adress': '/api/connections'},
+                           'registerList': {'adress': '/api/registers/'},
+                           'trendList': {'adress': '/api/trends/'},
+                           'graphList': {'adress': '/api/graphs'},
+                           'getCurValue': {'adress': '/api/register-values'},
+                           'getLocTime': {'adress': '/api/timeinfo'},
+                           'getRegLog': {'adress': '/api/register-log'},
+                           'getGraphData': {'adress': '/api/graph-data/'},
+                           }
 
+    def make_api_adress(self, action_name, kwargs):
+        '''Robi adres zapytania'''
 
-
-    def make_api_adress(self,action_name,args):
-        print(len(args))
-        if len(args)==0:
-            api_adress=self.api_adress[action_name]['adress']
+        if 'ID' in kwargs: # sprawdznie czy nie trzeba uzyc rozszeżonej wersji api adresu
+            ID = kwargs['ID']
         else:
-            api_adress=self.api_adress[action_name]['adress']+'{}'.format(args[0])
+            ID = ''
+        api_adress = self.api_adress[action_name]['adress'] + '{}'.format(ID)
         return api_adress
 
-    def make_headers(self):
-        return
+    def make_headers(self, kwargs):
+        '''Robi nagłowkek zapytania'''
+        headers = self.headers
+        # sprawdznie czy nie trzeba naspisac naglowka
+        if 'X_WH_CONNS' in kwargs.keys():
+            headers['X-WH-CONNS'] = kwargs['X_WH_CONNS']
+        if 'X_WH_START' in kwargs.keys():
+            headers['X-WH-START'] = kwargs['X_WH_START']
+        if 'X_WH_END' in kwargs.keys():
+            headers['X-WH-END'] = kwargs['X_WH_END']
+        if 'X_WH_REG_IDS' in kwargs.keys():
+            headers['X-WH-REG-IDS'] = kwargs['X_WH_REG_IDS']
+        if 'X_WH_SLICES' in kwargs.keys():
+            headers['X-WH-SLICES'] = kwargs['X_WH_SLICES']
+        if 'X_WH_REGS' in kwargs.keys():
+            headers['X-WH-REGS'] = kwargs['X_WH_REGS']
+        return headers
 
-
-
-    def make_req(self,action_name,head,*args):
-        print(args)
+    def make_req(self, action_name, response=False, **kwargs):
+        '''Wykonuje zapytanie (rodzaj zapytania, sczegoly zapytania, argumenty opcionalne)'''
         # ADRESS
-        api_adress=self.make_api_adress(action_name,args)
+        api_adress = self.make_api_adress(action_name, kwargs)
         url = self.device_adress + api_adress
-        print(url)
-        #HEAD
-        print(head)
+        print('Polaczenie na adres: ',url)
+        # HEAD
+        head = self.make_headers(kwargs)
         # GET
         r = requests.get(url, headers=head)
-        API.clear_headers(self) # wyczyszczenie headersow
-        print(r)
+        if response == True:
+            self.response_status(action_name, r)
         return r.json()
 
-
-    def clear_headers(self):
-        h=['X-WH-CONNS', 'X-WH-START', 'X-WH-END', 'X-WH-REG-IDS', 'X-WH-SLICES', 'X-WH-REGS', 'X-WH-GRAPH-ID']
-        for key in h:
-            self.headers[key]=''
-        print(self.headers)
-
-
-
-
-
-    def response_status(self,action, r):
-        '''Wydrukowanie wynikow'''
+    def response_status(self, action, r):
+        '''Drukuje status odpowiedzi'''
         # Response, status etc
         print('\n' + 140 * '-' + '\n')
         print('* {0} dla URL: {1}\n  Kodowanie znaków: {2}\n'.format(action, r.url, r.apparent_encoding))
@@ -78,25 +79,28 @@ class API:
         print('<!---------koniec-----------!>')
 
 
-
 if __name__ == "__main__":
-    from head import device_adress,APIKEY
+    from settings import device_adress, APIKEY
 
+    web = ApiWebHmi(device_adress, APIKEY)
 
-    web = API(device_adress,APIKEY)
-    headers=web.headers
+    con0=web.make_req('connectionList')
+    for i in con0:
+        print(i)
 
+    X_WH_CONNS = '10,12,14'
+    con1 = web.make_req('getCurValue', response=False, X_WH_CONNS=X_WH_CONNS)
+    print(con1)
 
-    headers['X-WH-CONNS']='5'
-    con1=web.make_req('getCurValue',headers)
-
-    con2=web.make_req('graphList',headers)
-
-
-    headers['X-WH-START']= '1558296000'
-    headers['X-WH-END']= '1558382400'
-    headers['X-WH-SLICES']= '800'
-    con3=web.make_req('getGraphData',headers,'33')
-    print(len(con3[0]))
-
-
+    ID = '1'
+    X_WH_START = '1558296000'
+    X_WH_END = '1558382400'
+    X_WH_SLICES = '800'
+    con2 = web.make_req('getGraphData',
+                        response=False,
+                        ID=ID,
+                        X_WH_START=X_WH_START,
+                        X_WH_END=X_WH_END,
+                        X_WH_SLICES=X_WH_SLICES)
+    for i in con2:
+        print(i)
