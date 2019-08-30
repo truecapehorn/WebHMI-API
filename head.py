@@ -22,19 +22,6 @@ data = json_read(filepath)
 APIKEY = data["properties"]['APIKEY']
 device_adress = data["properties"]['device_adress']
 
-headers = {'X-WH-APIKEY': APIKEY,
-           'Accept': 'application/json',
-           'Content-Type': 'application/json',
-           'X-WH-CONNS' : '',
-           'X-WH-START' : '',
-           'X-WH-END' : '',
-           'X-WH-REG-IDS' : '',
-           'X-WH-SLICES' : '',
-           'X-WH-REGS' : '',
-           'X-WH-GRAPH' : '',
-
-           }
-
 if __name__ == "__main__":
     print(data)
     print(APIKEY)

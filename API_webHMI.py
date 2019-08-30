@@ -4,29 +4,65 @@ import time
 
 class API:
 
-    def __init__(self,device_adress,headers):
+    def __init__(self,device_adress,api_kay):
         self.device_adress=device_adress
-        self.headers=headers
-        self.api_adress={'connectionList':'/api/connections',
-                         'registerList':'/api/registers/',
-                         'trendList':'/api/trends/',
-                         'graphList':'/api/trends/',
-                         'getCurValue':'/api/register-values',
-                         'getLocTime':'/api/timeinfo',
-                         'getRegLog':'/api/register-log',
-                         'getGraphData':'/api/graph-data/',
-                         'getGraph':'/api/graph-data/{}'.format(self.headers['X-WH-GRAPH']),
+        self.headers = {'X-WH-APIKEY': api_kay,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-WH-CONNS' : '',
+                        'X-WH-START' : '',
+                        'X-WH-END' : '',
+                        'X-WH-REG-IDS' : '',
+                        'X-WH-SLICES' : '',
+                        'X-WH-REGS' : '',
+                        }
 
+        self.api_adress={'connectionList':{'adress':'/api/connections'},
+                         'registerList':{'adress':'/api/registers/'},
+                         'trendList':{'adress':'/api/trends/'},
+                         'graphList':{'adress':'/api/graphs'},
+                         'getCurValue':{'adress':'/api/register-values'},
+                         'getLocTime':{'adress':'/api/timeinfo'},
+                         'getRegLog':{'adress':'/api/register-log'},
+                         'getGraphData':{'adress':'/api/graph-data/'},
                          }
 
 
-    def make_req(self,action_name,head):
+
+    def make_api_adress(self,action_name,args):
+        print(len(args))
+        if len(args)==0:
+            api_adress=self.api_adress[action_name]['adress']
+        else:
+            api_adress=self.api_adress[action_name]['adress']+'{}'.format(args[0])
+        return api_adress
+
+    def make_headers(self):
+        return
+
+
+
+    def make_req(self,action_name,head,*args):
+        print(args)
         # ADRESS
-        api_adress=self.api_adress[action_name]
+        api_adress=self.make_api_adress(action_name,args)
         url = self.device_adress + api_adress
+        print(url)
+        #HEAD
+        print(head)
         # GET
         r = requests.get(url, headers=head)
+        API.clear_headers(self) # wyczyszczenie headersow
+        print(r)
         return r.json()
+
+
+    def clear_headers(self):
+        h=['X-WH-CONNS', 'X-WH-START', 'X-WH-END', 'X-WH-REG-IDS', 'X-WH-SLICES', 'X-WH-REGS', 'X-WH-GRAPH-ID']
+        for key in h:
+            self.headers[key]=''
+        print(self.headers)
+
 
 
 
@@ -43,110 +79,24 @@ class API:
 
 
 
-
-
-
-
-
-    def connectionList(self):
-        '''Zczytanie listy połaczen webHMI'''
-        # ADRESS
-        url = self.device_adress + self.api_adress['connectionList']
-        # GET
-        r = requests.get(url, headers=self.headers)
-        return r.json()
-
-
-    def registerList(self):
-        '''Zczytanie listy rejestrow webHMI'''
-        # ADRESS
-        url = self.device_adress + self.api_adress['registerList']
-        # GET
-        r = requests.get(url, headers=headers)
-        return r.json()
-
-
-    def trendList(self):
-        '''Zczytanie listy trendow webHMI'''
-        # ADRESS
-        api_adress = '/api/trends/'
-        url = self.device_adress + self.api_adress
-        # GET
-        r = requests.get(url, headers=headers)
-        return r.json()
-
-
-    def graphList(self):
-        '''Zczytanie listy grafow webHMI'''
-        # ADRESS
-        api_adress = '/api/graphs/'
-        url = self.device_adress + self.api_adress
-        # GET
-        r = requests.get(url, headers=headers)
-        return r.json()
-
-
-    def getCurValue(self):
-        '''Zczytanie wartosci z rejestru'''
-        # ADRESS
-        api_adress = '/api/register-values'
-        url = self.device_adress + self.api_adress
-        # GET
-        r = requests.get(url, headers=headers)
-        return r.json()
-
-
-    def getLocTime(self):
-        '''Zczytanie daty UNIX time'''
-        # ADRESS
-        api_adress = '/api/timeinfo'
-        url = self.device_adress + self.api_adress
-        # GET
-        r = requests.get(url, headers=headers)
-        return r.json()
-
-
-    def getRegLog(self):
-        '''Zczytanie wartosci logow'''
-        # ADRESS
-        api_adress = '/api/register-log'
-        url = self.device_adress + self.api_adress
-        # GET
-        r = requests.get(url, headers=headers)
-        return r.json()
-
-
-    def getGraphData(self):
-        '''Zczytanie wartosc i wykresow'''
-        # ADRESS
-        api_adress = '/api/graph-data/'
-        url = self.device_adress + self.api_adress
-        # GET
-        r = requests.get(url, headers=headers)
-        action = 'pobranie wykresow'
-        return r.json()
-
-
-    def getGraph(self, graphID):
-        '''Zczytanie wartosc i wykresow ale dla konkretnego'''
-        # ADRESS
-        url = self.device_adress + self.api_adress['getGraph']+graphID
-        # GET
-        r = requests.get(url, headers=headers)
-        action = 'pobranie wykresow'
-        return r.json()
-
-
 if __name__ == "__main__":
-    from head import headers,device_adress
+    from head import device_adress,APIKEY
 
 
-    web = API(device_adress,headers)
+    web = API(device_adress,APIKEY)
+    headers=web.headers
 
-    print(web.headers)
-    head=web.headers
-    print(web.api_adress)
-    head = web.headers
-    head['X-WH-CONNS']='5'
-    con=web.make_req('getCurValue',head)
-    print(con)
+
+    headers['X-WH-CONNS']='5'
+    con1=web.make_req('getCurValue',headers)
+
+    con2=web.make_req('graphList',headers)
+
+
+    headers['X-WH-START']= '1558296000'
+    headers['X-WH-END']= '1558382400'
+    headers['X-WH-SLICES']= '800'
+    con3=web.make_req('getGraphData',headers,'33')
+    print(len(con3[0]))
+
+
