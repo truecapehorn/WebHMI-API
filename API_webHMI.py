@@ -2,8 +2,10 @@ import requests
 import time
 from datetime import datetime
 import pytz
-timezone_warszawa=pytz.timezone('Europe/Warsaw')
-timezone_utc=pytz.timezone('UTC')
+
+timezone_warszawa = pytz.timezone('Europe/Warsaw')
+timezone_utc = pytz.timezone('UTC')
+
 
 class ApiWebHmi:
     """ Umozliwia połaczenie sie z urzadzniem webHMI za pomocą jego API """
@@ -78,9 +80,9 @@ class ApiWebHmi:
     def req_time(self, *args):
         ''' Zwraca unix time do zapytan'''
         dt = datetime(*args)
-        dt = dt.astimezone(timezone_utc)
-        t = int(time.mktime(dt.timetuple()))
-        return str(t)
+        dt = dt.astimezone(timezone_warszawa)
+        t = dt.timestamp()
+        return str(int(t)-7200)
 
     def string_time(self, unix_sec):
         '''Zwraca unixtime w fromacie strina '''
@@ -103,10 +105,13 @@ if __name__ == "__main__":
     # con1 = web.make_req('getCurValue', response=False, X_WH_CONNS=X_WH_CONNS)
     # print(con1)
 
-    ID = '10'
+    ID = '1'
     X_WH_START = web.req_time(2019, 9, 1, 9, 30)
     X_WH_END = web.req_time(2019, 9, 1, 10, 30)
     X_WH_SLICES = '5'
+
+    print(X_WH_START, X_WH_END)
+
     con2 = web.make_req('getGraphData',
                         response=False,
                         ID=ID,
