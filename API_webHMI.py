@@ -1,5 +1,6 @@
 import requests
-import time, datetime
+import time
+from datetime import datetime
 
 
 class ApiWebHmi:
@@ -74,14 +75,15 @@ class ApiWebHmi:
 
     def req_time(self, *args):
         ''' Zwraca unix time do zapytan'''
-        dt = datetime.datetime(*args)
-        print(dt.timetuple())
-        return str(int(time.mktime(dt.timetuple())))
+        dt = datetime(*args)
+        utc = int(time.mktime(dt.timetuple()))
+        return str(utc)
 
     def string_time(self, unix_sec):
         '''Zwraca unixtime w fromacie strina '''
+        format = "%Y-%m-%d %H:%M:%S %Z%z"
         t = time.gmtime(unix_sec)
-        return time.strftime("%Y/%m/%d, %H:%M:%S", t)
+        return time.strftime(format, t)
 
 
 if __name__ == "__main__":
@@ -93,14 +95,14 @@ if __name__ == "__main__":
     # for i in con0:
     #     print(i)
 
-    X_WH_CONNS = '10,12,14'
-    con1 = web.make_req('getCurValue', response=False, X_WH_CONNS=X_WH_CONNS)
-    print(con1)
+    # X_WH_CONNS = '10,12,14'
+    # con1 = web.make_req('getCurValue', response=False, X_WH_CONNS=X_WH_CONNS)
+    # print(con1)
 
     ID = '10'
     X_WH_START = web.req_time(2019, 9, 1, 9, 30)
     X_WH_END = web.req_time(2019, 9, 1, 10, 30)
-    X_WH_SLICES = '19'
+    X_WH_SLICES = '5'
     con2 = web.make_req('getGraphData',
                         response=False,
                         ID=ID,
@@ -108,5 +110,5 @@ if __name__ == "__main__":
                         X_WH_END=X_WH_END,
                         X_WH_SLICES=X_WH_SLICES)
     for n, i in enumerate(con2):
-        t = web.string_time(i['x']/1000)
+        t = web.string_time(i['x'] / 1000)
         print(n, t, i)
