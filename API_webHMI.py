@@ -106,8 +106,8 @@ if __name__ == "__main__":
     # print(con1)
 
     ID = '1'
-    X_WH_START = web.req_time(2019, 9, 1, 9, 30)
-    X_WH_END = web.req_time(2019, 9, 1, 10, 30)
+    X_WH_START = web.req_time(2019, 9, 2, 9, 0)
+    X_WH_END = web.req_time(2019, 9, 2, 10, 0)
     X_WH_SLICES = '5'
 
     print(X_WH_START, X_WH_END)
