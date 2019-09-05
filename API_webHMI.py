@@ -7,7 +7,6 @@ timezone_utc = pytz.timezone('UTC')
 timezone_warszawa = pytz.timezone('Europe/Warsaw')
 
 
-
 class ApiWebHmi:
     """ Umozliwia połaczenie sie z urzadzniem webHMI za pomocą jego API """
 
@@ -33,6 +32,11 @@ class ApiWebHmi:
                            'getRegLog': {'adress': '/api/register-log'},
                            'getGraphData': {'adress': '/api/graph-data/'},
                            }
+
+    def doc(self):
+        with open('help.txt', 'r') as f:
+            data = f.read()
+        print(data, '\n')
 
     def make_api_adress(self, action_name, kwargs):
         '''Robi adres zapytania'''
@@ -83,12 +87,12 @@ class ApiWebHmi:
         dt = datetime(*args)
         dt = dt.astimezone(timezone_utc)
         t = dt.timestamp()
-        return str(t-7200)
+        return str(t - 7200)
 
     def string_time(self, unix_sec):
         '''Zwraca unixtime w fromacie strina '''
         format = "%Y-%m-%d %H:%M:%S %Z%z"
-        date_time = datetime.fromtimestamp(unix_sec,tz=timezone_warszawa)
+        date_time = datetime.fromtimestamp(unix_sec, tz=timezone_warszawa)
         d = date_time.strftime(format)
         return d
 
@@ -97,6 +101,8 @@ if __name__ == "__main__":
     from settings import device_adress, APIKEY
 
     web = ApiWebHmi(device_adress, APIKEY)
+
+    web.doc()
 
     # con0=web.make_req('connectionList')
     # for i in con0:
@@ -122,3 +128,5 @@ if __name__ == "__main__":
     for n, i in enumerate(con2):
         t = web.string_time(i['x'] / 1000)
         print(n, t, i)
+
+    help(web)
