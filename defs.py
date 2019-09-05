@@ -28,7 +28,6 @@ def csv_writer(file_path, df):
     # key_set = set()
     dict_list = list()
 
-
     try:
         os.remove(file_path)
     except FileNotFoundError:
@@ -39,5 +38,6 @@ def csv_writer(file_path, df):
         df.to_csv(file_path)
     except Exception as e:
         print('Nie mozna zapisac pliku csv', e)
+
 
 
