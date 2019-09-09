@@ -34,6 +34,7 @@ class ApiWebHmi:
                            }
 
     def doc(self):
+        """Drukuje dokumnetacja dla metod"""
         with open('help.txt', 'r') as f:
             data = f.read()
         print(data, '\n')
@@ -67,10 +68,14 @@ class ApiWebHmi:
         # HEAD
         head = self.make_headers(kwargs)
         # GET
-        r = requests.get(url, headers=head)
-        if response == True:
-            self.response_status(action_name, r)
-        return r.json()
+        try:
+            r = requests.get(url, headers=head)
+            if response == True or r.status_code != 200:
+                self.response_status(action_name, r)
+            return r.json()
+        except Exception as e:
+            print(e)
+            exit(1)
 
     def response_status(self, action, r):
         '''Drukuje status odpowiedzi'''
@@ -90,7 +95,7 @@ class ApiWebHmi:
         return str(t - 7200)
 
     def string_time(self, unix_sec):
-        '''Zwraca unixtime w fromacie strina '''
+        '''Zwraca date w fromacie strina. '''
         format = "%Y-%m-%d %H:%M:%S %Z%z"
         date_time = datetime.fromtimestamp(unix_sec, tz=timezone_warszawa)
         d = date_time.strftime(format)
@@ -101,8 +106,6 @@ if __name__ == "__main__":
     from settings import device_adress, APIKEY
 
     web = ApiWebHmi(device_adress, APIKEY)
-
-    web.doc()
 
     # con0=web.make_req('connectionList')
     # for i in con0:
@@ -118,9 +121,11 @@ if __name__ == "__main__":
     X_WH_SLICES = '5'
 
     print(X_WH_START, X_WH_END)
+    # web.device_adress="83.12.5.6"
+    # web.headers['X-WH-APIKEY']='22222233'
 
     con2 = web.make_req('getGraphData',
-                        response=False,
+                        response=True,
                         ID=ID,
                         X_WH_START=X_WH_START,
                         X_WH_END=X_WH_END,
@@ -128,5 +133,3 @@ if __name__ == "__main__":
     for n, i in enumerate(con2):
         t = web.string_time(i['x'] / 1000)
         print(n, t, i)
-
-    help(web)
