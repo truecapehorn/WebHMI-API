@@ -85,7 +85,7 @@ class ApiWebHmi:
 
     def req_time(self, *args):
         ''' Zwraca unix time do zapytan'''
-        tz = pendulum.timezone('Etc/GMT-4')
+        tz = pendulum.timezone('Europe/Samara')
         dt = pendulum.datetime(*args, tz=tz)
         timestamp = dt.int_timestamp
         return str(timestamp)
